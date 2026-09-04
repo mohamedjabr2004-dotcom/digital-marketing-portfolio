@@ -14,74 +14,54 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState("home")
 
   useEffect(() => {
-    const handleScroll = () => {
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter(Boolean) as HTMLElement[]
+
+    if (sections.length === 0) return
+
+    const updateActiveSection = () => {
       const offset = 180
+      let current = "home"
 
-      let currentSection = "home"
-
-      for (const item of navItems) {
-        const section = document.getElementById(item.id)
-
-        if (!section) continue
-
-        const rect = section.getBoundingClientRect()
-
-        if (rect.top <= offset) {
-          currentSection = item.id
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= offset) {
+          current = section.id
         }
       }
 
-      setActiveSection(currentSection)
+      setActiveSection(current)
     }
 
-    handleScroll()
-
-    window.addEventListener("scroll", handleScroll, {
+    window.addEventListener("scroll", updateActiveSection, {
       passive: true,
     })
 
-    window.addEventListener("resize", handleScroll)
+    updateActiveSection()
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-      window.removeEventListener("resize", handleScroll)
+      window.removeEventListener("scroll", updateActiveSection)
     }
   }, [])
 
-  const handleNavigation = (id: string) => {
-    const section = document.getElementById(id)
-
-    if (!section) return
-
-    const offset = 90
-
-    const top =
-      section.getBoundingClientRect().top +
-      window.scrollY -
-      offset
-
-    window.scrollTo({
-      top,
-      behavior: "smooth",
-    })
-  }
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800/70 bg-[#070d1a]">
-      <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center gap-1 rounded-2xl border border-slate-800 bg-[#0a1120] p-1.5">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-center px-2 py-3 sm:px-6 sm:py-4">
+        <nav className="flex w-full max-w-fit items-center gap-0.5 rounded-2xl border border-slate-800 bg-[#0a1120] p-1 sm:gap-1.5 sm:p-1.5">
           {navItems.map((item) => {
             const isActive = activeSection === item.id
 
             return (
-              <button
+              <a
                 key={item.id}
-                type="button"
-                onClick={() => handleNavigation(item.id)}
+                href={`#${item.id}`}
+                onClick={() => setActiveSection(item.id)}
                 className={`
-                  rounded-xl px-5 py-2.5
-                  text-sm font-medium
+                  shrink-0 rounded-xl
+                  px-3 py-2
+                  text-xs font-medium
                   transition-all duration-300
+                  sm:px-5 sm:py-2.5 sm:text-sm
                   ${
                     isActive
                       ? "bg-cyan-400/10 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.08)]"
@@ -90,7 +70,7 @@ export function Navbar() {
                 `}
               >
                 {item.name}
-              </button>
+              </a>
             )
           })}
         </nav>
